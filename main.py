@@ -2,6 +2,14 @@ from sys import argv, path
 import random
 
 
+def from_bits_to_bytes(count_binary, file):
+    barray = []
+    byte = 8
+    for l in range(0, int(count_binary / 8)):
+        barray.append(int(file[byte - 8:byte], 2))
+        byte += 8
+    return barray
+
 def random_key(lenght):
     key = ""
     for i in range(0, lenght):
@@ -34,8 +42,6 @@ def checkArgv(first):
 
 binary_content = ""
 newFile = ""
-barray = []
-byte = 8
 if argv[1] == '-e':
     orginal_path, key_path, encode_path =  checkArgv(argv[1])
     with open(orginal_path, 'rb') as fd:
@@ -45,18 +51,14 @@ if argv[1] == '-e':
             binary_content += bin(container[i])[2:].zfill(8)
         count_binary = len(binary_content)
         key = random_key(count_binary)
-        key_file = open(key_path, 'w')
-        key_file.write(key)
-        key_file.close()
+        with open(key_path, 'wb') as key_file:
+            key_file.write(bytearray(from_bits_to_bytes(count_binary, key)))
         for k in range(0, count_binary):
             newFile += str(xor(key[k], binary_content[k]))
-        for l in range(0, int(count_binary / 8)):
-            barray.append(int(newFile[byte - 8:byte], 2))
-            byte += 8
-        print(barray)
-        with open("C:\\Users\\Kevin\\Desktop\\Zabawa\\to_save_after.txt", 'wb') as fd_save:
-            fd_save.write(bytearray(barray))
-
+        with open(encode_path, 'wb') as fd_save:
+            fd_save.write(bytearray(from_bits_to_bytes(count_binary, newFile)))
+if argv[1] == '-d':
+    pass
 
 if argv[1] == '-help':
     checkArgv(argv[1])
